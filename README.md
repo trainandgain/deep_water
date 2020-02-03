@@ -2,4 +2,7 @@
 
 A surfer detection algorithm based on a sliding window convolutional neural network implementation inspired by the LeNet-5 network
 
-This repo houses 3 scripts which segment images to produce trianing data, train a model, and then run the model on a new image, and visualise the results.
+This repo houses 3 scripts which...
+- segment images to produce training data
+- train a model
+- run the model on a new image, and visualise the results.
