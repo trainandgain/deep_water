@@ -6,3 +6,5 @@ This repo houses 3 scripts which...
 - segment images to produce training data
 - train a model
 - run the model on a new image, and visualise the results.
+
+There is also an jpeg of what our example output looks like.
