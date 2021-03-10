@@ -5,7 +5,7 @@ IMAGE_SEGMENTS = 'inputs/segments...'
 
 MODEL_PATH = 'bin/new_model.hdf5'
 
-TRAINED_MODEL = 'bin/LeNet5_trained_model_99.hdf5'
+TRAINED_MODEL = 'C:/Users/micha/Documents/quant/deep_water/bin/LeNet5_trained_model_99.hdf5'
 
 POSITIVE_TRAINING_SEGS = 'inputs/training_segments_positive'
 

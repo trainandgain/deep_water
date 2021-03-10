@@ -65,7 +65,7 @@ def select_picks(coords_preds,
 
     return picks
     
-def visualise(picks, img):
+def visualise(img, picks, save_file=None):
     'Overlay picks and surfer count over image'
     # Count the remaining bounding boxes for surfer numbers
     count = picks.shape[0]
@@ -91,23 +91,14 @@ def visualise(picks, img):
     # Show surfer numbers on plot
     plt.text(1150, 650, str(count), fontsize=20)
 
-    # Show image
+    #if save_file:
+    #    plt.imsave(save_file, np.array(img), cmap='gray')
+    #else:
+        # Show image
     plt.imshow(np.array(img), cmap='gray')
 
-def run(file):
-    'Get inference on image file'
-    pass
-
-
-if __name__ == '__main__':
-    
-    # Import image file
-    import_file_path = 'inputs/frame0.jpg'
-    
-    # Import trained model
-    model = keras.models.load_model('C:/Users/micha/Documents/quant/deep_water/bin/LeNet5_trained_model_99.hdf5')
-    
-    img = init_img(import_file_path)
+def run_single_img(img, model):
+    'Visualise model result on jpeg file'
     
     # Segment image using sliding window
     segments, coords = sliding_window(img, step_size=8, window_size=(22, 22))
@@ -121,5 +112,33 @@ if __name__ == '__main__':
     # Select picks for surfer locations
     picks = select_picks(coords_preds)
     
-    visualise(picks, img)
+    visualise(img, picks, save_file)
+    
+def run_video(folder):
+    'Visualise model result on folder of jpeg files'
+    # read in video frame by frame
+    
+    
+    # for frame in frames
+        # run_single_img    
+        # write frame to video out
+    
+    # end
+
+
+
+
+if __name__ == '__main__':
+    
+    # Image file
+    single_img = 'inputs/frame0.jpg'
+    save_file = 'outputs/example.jpg'
+    
+    # Import trained model
+    model = keras.models.load_model(config.TRAINED_MODEL)
+    
+    # Import image
+    img = init_img(img_file)
+    
+    run_single_img(single_img, model)
     
