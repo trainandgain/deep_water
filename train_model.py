@@ -71,6 +71,7 @@ def import_training_data(dir_path):
     return examples
 
 def run(path_pos, path_neg, epochs, val_split, model_path=None):
+    ''
     
     # Import and format data
     pos_examples = import_training_data(path_pos)
@@ -115,7 +116,7 @@ if __name__ == '__main__':
     
     path_pos = config.POSITIVE_TRAINING_SEGS
     path_neg = config.NEGATIVE_TRAINING_SEGS
-    epochs = 50#config.EPOCHS
+    epochs = config.EPOCHS
     val_split = config.VAL_SPLIT
     random_state = config.RANDOM_STATE
     model_path = config.MODEL_PATH

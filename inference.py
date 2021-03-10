@@ -3,7 +3,7 @@ import cv2
 
 from tensorflow import keras
 
-from img_utils import non_max_suppression
+from non_max_supp import non_max_suppression
 
 import config
 
@@ -12,9 +12,7 @@ def init_img(import_file_path):
     return cv2.imread(import_file_path, cv2.IMREAD_GRAYSCALE)
 
 def sliding_window(image, step_size, window_size):
-    ''' Slide a window across the image and yield the individual
-    segments and corner coodinates
-    '''
+    'Slide a window across image and yield image segments and corner coords'
     seg_shape = (1,) + window_size + (1,)  # Additional dim required for keras
     coord_shape = (1, 4)
     segs = np.empty(seg_shape)
@@ -48,7 +46,7 @@ def get_predictions(X, segment_coords, model):
     return coords_preds
 
 def select_picks(coords_preds, 
-                             proba_threshold=0.5, 
+                             proba_threshold=0.8, 
                              overlap_threshold=0.01
                              ):
     'Process model output to get selections of surfer location in image'
@@ -94,11 +92,6 @@ def plot_bounding_boxes(img, picks):
                 (255,255,255), 3)
     
     return img
-    #if save_file:
-    #    plt.imsave(save_file, np.array(img), cmap='gray')
-    #else:
-    # Show image
-    #cv2.imshow('frame', np.array(img))#, cmap='gray')
 
 def run_single_img(img, model):
     'Visualise model result on jpeg file'
@@ -120,16 +113,17 @@ def run_single_img(img, model):
     return output_img, picks
     
 def run_video(mp4_file, video_out, model, frame_limit):
-    'Visualise model result on folder of jpeg files'
+    'Returns model overlay on mp4 video input'
     # Read in video frame by frame
     cap = cv2.VideoCapture(mp4_file)
     
     if cap.isOpened() == False:
         raise ValueError('Error opening mp4 file')
     
-    fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    out = cv2.VideoWriter(video_out ,fourcc, 12.0, (int(cap.get(3)), int(cap.get(4))))
-
+    vid_resolution = (int(cap.get(3)), int(cap.get(4)))
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')  # Video encoder for Windows10
+    out = cv2.VideoWriter(video_out, fourcc, 12, vid_resolution)
+    
     # Count frames processed
     frame = 0
     
@@ -138,7 +132,7 @@ def run_video(mp4_file, video_out, model, frame_limit):
         if ret == True:
             # Only process every other frame
             frame += 1
-            if frame % 2 == 0:
+            if frame % 30 == 0:
                 continue
             
             # Convert to black and white for processing
@@ -157,7 +151,7 @@ def run_video(mp4_file, video_out, model, frame_limit):
         # When end of video reached break loop
         else:
             break
-     
+    
     # Release video capture and output objects
     cap.release()
     out.release() 
@@ -168,17 +162,13 @@ def run_video(mp4_file, video_out, model, frame_limit):
 if __name__ == '__main__':
     
     # File paths
-    single_img = 'inputs/frame0.jpg'
-    mp4 = 'inputs/magicseaweed.croyd.mp4'
-    video_out = 'outputs/test.avi'
-    frame_limit = 480
+    mp4 = config.MP4_FILE
+    video_out = config.VIDEO_OUT
+    frame_limit = config.FRAME_LIMIT
+    model_file = config.TRAINED_MODEL
     
     # Import trained model
-    model = keras.models.load_model(config.TRAINED_MODEL)
-    
-    # Import image
-    #img = init_img(single_img)
-    #output, _ = run_single_img(img, model)
+    model = keras.models.load_model(model_file)
 
     # Run on mp4 video    
     run_video(mp4, video_out, model, frame_limit)
