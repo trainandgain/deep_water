@@ -3,9 +3,9 @@ FULL_IMAGES = 'inputs/images...'
 
 IMAGE_SEGMENTS = 'inputs/segments...'
 
-MODEL_PATH = 'bin/LeNet5_trained_model.hdf5'
+MODEL_PATH = 'bin/new_model.hdf5'
 
-TRAINED_MODEL = 'bin/test_model_LeNet.hdf5'
+TRAINED_MODEL = 'bin/LeNet5_trained_model_99.hdf5'
 
 POSITIVE_TRAINING_SEGS = 'inputs/training_segments_positive'
 

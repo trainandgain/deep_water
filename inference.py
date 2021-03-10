@@ -16,6 +16,11 @@ def sliding_window(image, step_size, window_size):
     ''' Slide a window across the image and yield the individual
     segments and corner coodinates
     '''
+    seg_shape = (1,) + window_size + (1,)  # Additional dim required for keras
+    coord_shape = (1, 4)
+    segs = np.empty(seg_shape)
+    coords = np.empty(coord_shape)
+    
     for y in range(370, image.shape[0], step_size): 
         for x in range(0, (image.shape[1] - 200), step_size):
             segment = image[y:y + window_size[1], x:x + window_size[0]]
@@ -23,28 +28,24 @@ def sliding_window(image, step_size, window_size):
             
             # Check if segment is full-size (not on edge of image)
             if seg_size == (window_size[0] * window_size[1]):
-                coords = np.array([x, y, x + window_size[0], y + window_size[1]])
+                coord = np.array([x, y, x + window_size[0], y + window_size[1]])
                 
-                yield segment, coords
-
-def iter_2_array(array_iterable, shape):
-    'Takes in iterator generating array, combines iters into single array'
-    array = np.empty(shape)
-    for example in array_iterable:
-            reshaped = np.reshape(example, shape)
-            array = np.concatenate((array, reshaped)) 
-    # Remove initial row
-    array = np.delete(array, 0, 0)
-    return array    
+                # Append segment to segs; coord to coords
+                segment_reshaped = np.reshape(segment, seg_shape)
+                coord_reshaped = np.reshape(coord, coord_shape)
+                segs = np.concatenate((segs, segment_reshaped))
+                coords = np.concatenate((coords, coord_reshaped)) 
+                
+    # Delete redundant first row created on array init
+    segs = np.delete(segs, 0, 0)
+    coords = np.delete(coords, 0, 0)
+    
+    return segs, coords
 
 def get_predictions(X, segment_coords, model):
-    'Returns model predictions and segment coords'
-    model = keras.models.load_model(model)
-    predictions = model.predict(X)
-    
-    # Concatenate model predictions and segment coords into single array
+    'Returns model predictions and segment coords in single array'
+    predictions = model.predict(X)    
     coords_preds = np.concatenate((segment_coords, predictions), axis=1)
-    
     return coords_preds
 
 def select_picks(coords_preds, 
@@ -64,7 +65,7 @@ def select_picks(coords_preds,
 
     return picks
     
-def visualise_picks(picks, img):
+def visualise(picks, img):
     'Overlay picks and surfer count over image'
     # Count the remaining bounding boxes for surfer numbers
     count = picks.shape[0]
@@ -103,23 +104,22 @@ if __name__ == '__main__':
     # Import image file
     import_file_path = 'inputs/frame0.jpg'
     
+    # Import trained model
+    model = keras.models.load_model('C:/Users/micha/Documents/quant/deep_water/bin/LeNet5_trained_model_99.hdf5')
+    
     img = init_img(import_file_path)
     
     # Segment image using sliding window
-    segments, coords = sliding_window(img, step_size=8, window_size=[22, 22])
-
-    # Wrangle segments into a numpy array for keras model
-    segment_examples = iter_2_array(segments, shape=(1, 22, 22, 1))
-    segment_coords = iter_2_array(coords, shape=(1, 4))
+    segments, coords = sliding_window(img, step_size=8, window_size=(22, 22))
     
     # Feature scale the input pixel values for model
-    X = segment_examples / 255
+    X = segments / 255
     
     # Load and run model
-    coords_preds = get_predictions(X, segment_coords, config.TRAINED_MODEL)
+    coords_preds = get_predictions(X, coords, model)
     
     # Select picks for surfer locations
     picks = select_picks(coords_preds)
     
-    visualise_picks(picks, img)
+    visualise(picks, img)
     
