@@ -1,6 +1,5 @@
 import numpy as np 
 import cv2
-import matplotlib.pyplot as plt
 
 from tensorflow import keras
 
@@ -22,7 +21,7 @@ def sliding_window(image, step_size, window_size):
     coords = np.empty(coord_shape)
     
     for y in range(370, image.shape[0], step_size): 
-        for x in range(0, (image.shape[1] - 200), step_size):
+        for x in range(0, (image.shape[1] - 250), step_size):  # FROM 200
             segment = image[y:y + window_size[1], x:x + window_size[0]]
             seg_size = np.size(segment)
             
@@ -120,7 +119,7 @@ def run_single_img(img, model):
     
     return output_img, picks
     
-def run_video(mp4_file, model):
+def run_video(mp4_file, video_out, model, frame_limit):
     'Visualise model result on folder of jpeg files'
     # Read in video frame by frame
     cap = cv2.VideoCapture(mp4_file)
@@ -128,46 +127,41 @@ def run_video(mp4_file, model):
     if cap.isOpened() == False:
         raise ValueError('Error opening mp4 file')
     
-    #fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    #out = cv2.VideoWriter('output.avi',fourcc, 20.0, (1280,720))
-    
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    out = cv2.VideoWriter(video_out ,fourcc, 12.0, (int(cap.get(3)), int(cap.get(4))))
+
+    # Count frames processed
     frame = 0
     
-    while cap.isOpened():   #and frames_processed <= n_frames:
+    while cap.isOpened() and frame <= frame_limit:
         ret, rgb_img = cap.read()
         if ret == True:
-            # Count frames processed
+            # Only process every other frame
             frame += 1
+            if frame % 2 == 0:
+                continue
+            
             # Convert to black and white for processing
             bw_img = cv2.cvtColor(rgb_img, cv2.COLOR_BGR2GRAY)
             # Get model picks
             _, picks = run_single_img(bw_img, model)
             # Visualise results
             output = plot_bounding_boxes(rgb_img, picks)
-            # Write to img
-            cv2.imwrite(f'output/out_{frame}.jpg', output)
-            print(f'frame {frame} processed!')
+            # Write to jpeg
+            cv2.imwrite(f'outputs/out_{frame}.jpg', output)
+            # Write to video
+            out.write(output)
             
-            # TODO: write to video
-            # Display the resulting frame
-            #cv2.imshow('Frame', output)
-            # Press Q on keyboard to exit
-            #if cv2.waitKey(25) & 0xFF == ord('q'):
-            #    break
-
-        # Break the loop
+            print(f'frame {frame} processed!')
+               
+        # When end of video reached break loop
         else:
             break
      
-    # When everything done, release the video capture object
+    # Release video capture and output objects
     cap.release()
     out.release() 
-    
-    # Closes all the frames
-    cv2.destroyAllWindows()
-    
-    # end
-    
+
 
 
 
@@ -176,6 +170,8 @@ if __name__ == '__main__':
     # File paths
     single_img = 'inputs/frame0.jpg'
     mp4 = 'inputs/magicseaweed.croyd.mp4'
+    video_out = 'outputs/test.avi'
+    frame_limit = 480
     
     # Import trained model
     model = keras.models.load_model(config.TRAINED_MODEL)
@@ -185,6 +181,5 @@ if __name__ == '__main__':
     #output, _ = run_single_img(img, model)
 
     # Run on mp4 video    
-    run_video(mp4, model)
-    
+    run_video(mp4, video_out, model, frame_limit)
     
