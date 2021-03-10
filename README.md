@@ -16,7 +16,8 @@ This repo houses 3 primary scripts which...
 
 Package requirements are listed in the environment file. You can generate an anaconda environment from this by simply running the following in your terminal.
 
-```conda env create -f environment.yml
+```
+conda env create -f environment.yml
 ```
 
 - Use the config.py file to specify paths to data, parameters, and file destinations 
