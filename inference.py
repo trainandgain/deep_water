@@ -65,7 +65,7 @@ def select_picks(coords_preds,
 
     return picks
     
-def visualise(img, picks, save_file=None):
+def plot_bounding_boxes(img, picks):
     'Overlay picks and surfer count over image'
     # Count the remaining bounding boxes for surfer numbers
     count = picks.shape[0]
@@ -85,17 +85,21 @@ def visualise(img, picks, save_file=None):
         cv2.rectangle(img, 
                       (x1[i], y1[i]), 
                       ((x1[i]+w), (y1[i]+h)), 
-                      (255,0,0), 
+                      (255,255,255), 
                       2)
-
+        
     # Show surfer numbers on plot
-    plt.text(1150, 650, str(count), fontsize=20)
-
+    #plt.text(1150, 650, str(count), fontsize=20)
+    cv2.putText(img, str(count), (1150, 650), 
+                cv2.FONT_HERSHEY_SIMPLEX, 2, 
+                (255,255,255), 3)
+    
+    return img
     #if save_file:
     #    plt.imsave(save_file, np.array(img), cmap='gray')
     #else:
-        # Show image
-    plt.imshow(np.array(img), cmap='gray')
+    # Show image
+    #cv2.imshow('frame', np.array(img))#, cmap='gray')
 
 def run_single_img(img, model):
     'Visualise model result on jpeg file'
@@ -112,33 +116,75 @@ def run_single_img(img, model):
     # Select picks for surfer locations
     picks = select_picks(coords_preds)
     
-    visualise(img, picks, save_file)
+    output_img = plot_bounding_boxes(img, picks)
     
-def run_video(folder):
+    return output_img, picks
+    
+def run_video(mp4_file, model):
     'Visualise model result on folder of jpeg files'
-    # read in video frame by frame
+    # Read in video frame by frame
+    cap = cv2.VideoCapture(mp4_file)
     
+    if cap.isOpened() == False:
+        raise ValueError('Error opening mp4 file')
     
-    # for frame in frames
-        # run_single_img    
-        # write frame to video out
+    #fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    #out = cv2.VideoWriter('output.avi',fourcc, 20.0, (1280,720))
+    
+    frame = 0
+    
+    while cap.isOpened():   #and frames_processed <= n_frames:
+        ret, rgb_img = cap.read()
+        if ret == True:
+            # Count frames processed
+            frame += 1
+            # Convert to black and white for processing
+            bw_img = cv2.cvtColor(rgb_img, cv2.COLOR_BGR2GRAY)
+            # Get model picks
+            _, picks = run_single_img(bw_img, model)
+            # Visualise results
+            output = plot_bounding_boxes(rgb_img, picks)
+            # Write to img
+            cv2.imwrite(f'output/out_{frame}.jpg', output)
+            print(f'frame {frame} processed!')
+            
+            # TODO: write to video
+            # Display the resulting frame
+            #cv2.imshow('Frame', output)
+            # Press Q on keyboard to exit
+            #if cv2.waitKey(25) & 0xFF == ord('q'):
+            #    break
+
+        # Break the loop
+        else:
+            break
+     
+    # When everything done, release the video capture object
+    cap.release()
+    out.release() 
+    
+    # Closes all the frames
+    cv2.destroyAllWindows()
     
     # end
-
+    
 
 
 
 if __name__ == '__main__':
     
-    # Image file
+    # File paths
     single_img = 'inputs/frame0.jpg'
-    save_file = 'outputs/example.jpg'
+    mp4 = 'inputs/magicseaweed.croyd.mp4'
     
     # Import trained model
     model = keras.models.load_model(config.TRAINED_MODEL)
     
     # Import image
-    img = init_img(img_file)
+    #img = init_img(single_img)
+    #output, _ = run_single_img(img, model)
+
+    # Run on mp4 video    
+    run_video(mp4, model)
     
-    run_single_img(single_img, model)
     
