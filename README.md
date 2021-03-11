@@ -3,7 +3,8 @@
 A surfer detection algorithm using a sliding window convolutional neural network implementation inspired by the LeNet-5 network. Written in pure Python.
 
 # Example output video
-https://user-images.githubusercontent.com/47697889/110666153-f8a1f680-81c0-11eb-8c2a-9c0411f5af63.mp4
+https://user-images.githubusercontent.com/47697889/110752203-d77eeb80-823c-11eb-8d5f-cfa887c8829b.mp4
+
 
 # Example output png
 <img width="672" alt="output_example" src="https://user-images.githubusercontent.com/47697889/110666284-14a59800-81c1-11eb-9b3e-32579e49cde6.png">
