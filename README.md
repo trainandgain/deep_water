@@ -18,7 +18,7 @@ This repo houses 3 primary scripts which...
 Package requirements are listed in the environment file. You can generate an anaconda environment from this by navigating to the 'deep_water' root directory and running the following in your terminal.
 
 ```
-conda create -n deep_water -f environment.yml
+conda env create -f environment.yml
 ```
 
 ## segment_images.py
