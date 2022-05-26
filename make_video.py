@@ -6,15 +6,6 @@ import os
 import skvideo.io
 from tqdm import tqdm
 
-def run(x):
-    f = cv2.imread(x[0])
-    frameSize = (f.shape[0], f.shape[1])
-    out = cv2.VideoWriter('video/output_video.mp4',cv2.VideoWriter_fourcc(*'DIVX'), 20, frameSize)
-    for filename in x:
-        img = cv2.imread(filename)
-        out.write(img)
-    out.release()
-
 def save_files(x):
     f = cv2.imread(x[0])
     h, w = f.shape[0], f.shape[1]
@@ -24,7 +15,7 @@ def save_files(x):
         img = cv2.imread(s)
         out_video[i] = img
     # Writes the the output image sequences in a video file
-    skvideo.io.vwrite("video.mp4", out_video)
+    skvideo.io.vwrite("video/video.mp4", out_video)
 
 
 if __name__ == '__main__':
